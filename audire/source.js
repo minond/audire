@@ -4,8 +4,7 @@
  * @class Source
  * @constructor
  */
-function Source() {
-}
+function Source() {}
 
 /**
  * @method getStreamUrl
