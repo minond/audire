@@ -1,0 +1,10 @@
+{
+  "name": "audire",
+  "version": "1.0.0",
+  "devDependencies": {
+    "complexity-report": "^1.0.6",
+    "jscs": "^1.7.3",
+    "jshint": "^2.5.10",
+    "jsmin": "^1.0.1"
+  }
+}
