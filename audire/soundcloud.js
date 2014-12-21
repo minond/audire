@@ -1,18 +1,15 @@
 'use strict';
 
-var TRACK_URL = 'http://api.soundcloud.com/tracks/%s.json?client_id=%s';
+var CLIENT_PARAM = '?client_id=%s',
+    TRACK_URL = 'http://api.soundcloud.com/tracks/%s.json' + CLIENT_PARAM;
 
 var Q = require('Q'),
-    util = require('util'),
-    request = require('request'),
-    browser = require('in-browser');
+    inherits = require('util').inherits,
+    format = require('util').format;
 
 var Source = require('./source'),
-    Song = require('./song');
-
-if (browser) {
-    request = require('browser-request');
-}
+    Song = require('./song'),
+    request = require('./request');
 
 /**
  * @constructor
@@ -23,7 +20,7 @@ function Soundcloud(client_id) {
     this.client_id = client_id;
 }
 
-util.inherits(Soundcloud, Source);
+inherits(Soundcloud, Source);
 
 /**
  * @method getSong
@@ -31,7 +28,7 @@ util.inherits(Soundcloud, Source);
  * @return {Song}
  */
 Soundcloud.prototype.getSong = function (id) {
-    var url = util.format(TRACK_URL, id, this.client_id),
+    var url = format(TRACK_URL, id, this.client_id),
         deferred = Q.defer(),
         song;
 
@@ -41,7 +38,7 @@ Soundcloud.prototype.getSong = function (id) {
         } else {
             try {
                 song = new Song(JSON.parse(body));
-                song.stream_url += '?client_id=' + this.client_id;
+                song.stream_url += format(CLIENT_PARAM, this.client_id);
                 deferred.resolve(song);
             } catch (ex) {
                 deferred.reject(ex);
