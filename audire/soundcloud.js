@@ -37,9 +37,10 @@ Soundcloud.prototype.getSong = function (id) {
             deferred.reject(err);
         } else {
             try {
-                song = new Song(JSON.parse(body));
+                song = JSON.parse(body);
                 song.stream_url += format(CLIENT_PARAM, this.client_id);
-                deferred.resolve(song);
+                song.artist = song.user.username;
+                deferred.resolve(new Song(song));
             } catch (ex) {
                 deferred.reject(ex);
             }
