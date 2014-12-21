@@ -6,9 +6,9 @@ var Q = require('Q'),
 
 var soundcloud = new Soundcloud('96b942eb086a5093d4ea08ab69c5a16b');
 
-var player, btn_play, btn_pause, ractive;
+var player, ractive;
 
-soundcloud.getSong('180559953').then(function (song) {
+soundcloud.getSong('135465952').then(function (song) {
     console.log(song);
 
     if (browser) {
@@ -25,17 +25,18 @@ if (browser) {
     ractive = new Ractive({
         el: '#player',
         template: fs.readFileSync('./player.html').toString(),
-        data: player
+        data: player,
+        player: player,
+        play: function () {
+            this.player.audio.play();
+        },
+        pause: function () {
+            this.player.audio.pause();
+        }
     });
 
     window.player = player;
     window.ractive = ractive;
-
-    btn_play = document.querySelector('#play');
-    btn_pause = document.querySelector('#pause');
-
-    // btn_play.addEventListener('click', player.audio.play.bind(player.audio));
-    // btn_pause.addEventListener('click', player.audio.pause.bind(player.audio));
 
     player.on('play', function (song) {
         ractive.update('song');
