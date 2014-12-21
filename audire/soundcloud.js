@@ -1,7 +1,18 @@
 'use strict';
 
+var TRACK_URL = 'http://api.soundcloud.com/tracks/%s.json?client_id=%s';
+
+var Q = require('Q'),
+    util = require('util'),
+    request = require('request'),
+    browser = require('in-browser');
+
 var Source = require('./source'),
-    util = require('util');
+    Song = require('./song');
+
+if (browser) {
+    request = require('browser-request');
+}
 
 /**
  * @constructor
@@ -15,13 +26,30 @@ function Soundcloud(client_id) {
 util.inherits(Soundcloud, Source);
 
 /**
- * @method getStreamUrl
+ * @method getSong
  * @param {String} id
- * @return {String}
+ * @return {Song}
  */
-Soundcloud.prototype.getStreamUrl = function (id) {
-    return util.format('http://api.soundcloud.com/tracks/%s/stream?client_id=%s',
-        id, this.client_id);
+Soundcloud.prototype.getSong = function (id) {
+    var url = util.format(TRACK_URL, id, this.client_id),
+        deferred = Q.defer(),
+        song;
+
+    request(url, function (err, res, body) {
+        if (err) {
+            deferred.reject(err);
+        } else {
+            try {
+                song = new Song(JSON.parse(body));
+                song.stream_url += '?client_id=' + this.client_id;
+                deferred.resolve(song);
+            } catch (ex) {
+                deferred.reject(ex);
+            }
+        }
+    }.bind(this));
+
+    return deferred.promise;
 };
 
 module.exports = Soundcloud;

@@ -7,10 +7,10 @@
 function Source() {}
 
 /**
- * @method getStreamUrl
- * @return {String}
+ * @method getSong
+ * @return {Q.deferred}
  */
-Source.prototype.getStreamUrl = function () {
+Source.prototype.getSong = function () {
     throw new Error('invalid source');
 };
 
