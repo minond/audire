@@ -1,4 +1,5 @@
 .player {
+    background-color: rgb(24, 7, 7);
     cursor: default;
     position: relative;
     font-family: monospace;
@@ -8,6 +9,7 @@
 
 .player .artwork {
     background-position: 50%;
+    background-size: 100%;
     height: 100%;
     opacity: .5;
     transition: opacity .4s;
@@ -21,9 +23,10 @@
 .player .controls {
     background: rgba(15, 13, 13, .6);
     bottom: 0;
-    height: 120px;
+    box-sizing: border-box;
+    height: 30%;
     left: 0;
-    padding: 25px 35px 0 35px;
+    padding: 5% 10px 0 10px;
     position: absolute;
     right: 0;
     z-index: 1;
@@ -75,15 +78,17 @@
 }
 
 .player .controls .buttons {
-    margin-top: 26px;
+    position: relative;
     text-align: center;
+    top: 50%;
+    transform: translateY(-100%);
 }
 
 .player .controls .buttons svg {
     cursor: pointer;
     fill: currentColor;
-    height: 25px;
-    margin: 0 6px;
+    height: 25%;
+    margin: 0 2%;
 }
 
 .player.state-playing .controls .buttons .play,
