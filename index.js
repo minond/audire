@@ -1,5 +1,5 @@
-var Player = require('./audire/player'),
-    Soundcloud = require('./audire/soundcloud'),
+var Player = require('./src/player'),
+    Soundcloud = require('./src/soundcloud'),
     browser = require('in-browser');
 
 var soundcloud = new Soundcloud('96b942eb086a5093d4ea08ab69c5a16b');
