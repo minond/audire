@@ -12,24 +12,33 @@ soundcloud.getSong('165098282').then(function (song) {
     console.log(song);
 
     if (browser) {
-        player.audio.src = song.stream_url;
+        player.play(song);
     }
 });
 
 var fs = require('fs');
 
 if (browser) {
+    player = new Player(document);
+
     ractive = new Ractive({
         el: 'body',
-        template: fs.readFileSync('./player.html').toString()
+        template: fs.readFileSync('./player.html').toString(),
+        data: player
     });
 
-    player = new Player(document);
+    window.player = player;
+    window.ractive = ractive;
+
     btn_play = document.querySelector('#play');
     btn_pause = document.querySelector('#pause');
 
     btn_play.addEventListener('click', player.audio.play.bind(player.audio));
     btn_pause.addEventListener('click', player.audio.pause.bind(player.audio));
+
+    player.on('play', function (song) {
+        ractive.update('song');
+    });
 
     player.audio.addEventListener('loadstart', function (ev) {
         console.log('loading');
@@ -41,7 +50,7 @@ if (browser) {
 
     player.audio.addEventListener('canplay', function (ev) {
         console.log('done loading');
-        player.audio.currentTime = 60;
+        // player.audio.currentTime = 60;
     });
 
     player.audio.addEventListener('ended', function (ev) {
@@ -49,6 +58,7 @@ if (browser) {
     });
 
     player.audio.addEventListener('timeupdate', function (ev) {
-        console.log(ev.target.currentTime.toString(), '/', ev.target.duration.toString());
+        // console.log(ev.target.currentTime.toString(), '/', ev.target.duration.toString());
+        ractive.update('audio');
     });
 }

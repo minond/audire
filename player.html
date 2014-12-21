@@ -1,2 +1,9 @@
 <input type="button" id="play" value="play" />
 <input type="button" id="pause" value="pause" />
+<br>
+<img src="{{song.artwork_url}}" />
+<br>
+<pre>{{audio.paused}}</pre>
+<pre>{{audio.currentTime}}</pre>
+<pre>{{song.title}} by {{song.artist}}</pre>
+<pre>{{JSON.stringify(song, null, '  ')}}</pre>
