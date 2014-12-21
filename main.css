@@ -82,6 +82,11 @@
     margin: 0 6px;
 }
 
+.player.state-ended .controls input[type='range']::-webkit-slider-thumb {
+    height: 0;
+    width: 0;
+}
+
 .player.state-playing .artwork {
     opacity: 1;
 }

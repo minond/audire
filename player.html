@@ -8,6 +8,7 @@
 
 <div class="player
     {{#audio.canplay}}state-canplay{{/}}
+    {{#audio.ended}}state-ended{{/}}
     {{#audio.paused}}state-paused{{/}}
     {{^audio.paused}}state-playing{{/}}
     {{#audio.seeking}}state-seeking{{/}}"
