@@ -51,7 +51,7 @@ if (browser) {
 
     player.audio.addEventListener('canplay', function (ev) {
         console.log('done loading');
-        player.song.canplay = true;
+        player.audio.canplay = true;
         // player.audio.currentTime = 60;
     });
 

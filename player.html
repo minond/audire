@@ -6,16 +6,35 @@
 <pre>{{song.title}} by {{song.artist}}</pre>
 <pre>{{JSON.stringify(song, null, '  ')}}</pre>-->
 
-<div class="player" style="background-image: url({{song.artwork_url}})">
+<div style="background-image: url({{song.artwork_url}})"
+    class="player
+        {{#audio.canplay}}state-canplay{{/}}
+        {{#audio.paused}}state-paused{{/}}
+        {{^audio.paused}}state-playing{{/}}
+        {{#audio.seeking}}state-seeking{{/}}
+    "
+>
     <div class="controls">
         <section class="track">
             <table>
                 <tr>
-                    <td>{{# nice_time.minutes_and_seconds(audio.currentTime) }}{{.min.replace(' ', '')}} {{.sec.replace(' ', '')}}{{/}}</td>
+                    <td>
+                        {{#audio.canplay}}
+                        <span>{{# nice_time.minutes_and_seconds(audio.currentTime) }}{{.min.replace(' ', '')}} {{.sec.replace(' ', '')}}{{/}}</span>
+                        {{else}}
+                        <span>0m 0s</span>
+                        {{/audio.canplay}}
+                    </td>
                     <td>
                         <input type="range" min="0" max="{{audio.duration}}" step="1" value="{{audio.currentTime}}" />
                     </td>
-                    <td>{{# nice_time.minutes_and_seconds(audio.duration) }}{{.min.replace(' ', '')}} {{.sec.replace(' ', '')}}{{/}}</td>
+                    <td>
+                        {{#audio.canplay}}
+                        <span>{{# nice_time.minutes_and_seconds(audio.duration) }}{{.min.replace(' ', '')}} {{.sec.replace(' ', '')}}{{/}}</span>
+                        {{else}}
+                        <span>0m 0s</span>
+                        {{/audio.canplay}}
+                    </td>
                 </tr>
             </table>
         </sction>
