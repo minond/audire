@@ -40,6 +40,7 @@ Soundcloud.prototype.getSong = function (id) {
                 song = JSON.parse(body);
                 song.stream_url += format(CLIENT_PARAM, this.client_id);
                 song.artist = song.user.username;
+                song.artwork_url = song.artwork_url.replace('large', 't500x500');
                 deferred.resolve(new Song(song));
             } catch (ex) {
                 deferred.reject(ex);
