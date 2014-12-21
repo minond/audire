@@ -20,8 +20,8 @@ var fs = require('fs');
 
 if (browser) {
     player = new Player(document);
+    player.nice_time = require('a-nice-time');
 
-    Ractive.defaults.data.nice_time = require('a-nice-time');
     ractive = new Ractive({
         el: '#player',
         template: fs.readFileSync('./player.html').toString(),

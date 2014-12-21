@@ -20,17 +20,26 @@
                 <tr>
                     <td>
                         {{#audio.canplay}}
-                        <span>{{# nice_time.minutes_and_seconds(audio.currentTime) }}{{.min.replace(' ', '')}} {{.sec.replace(' ', '')}}{{/}}</span>
+                        <span>
+                        {{# nice_time.minutes_and_seconds(audio.currentTime) }}
+                            {{.min.replace(' ', '')}} {{.sec.replace(' ', '')}}
+                        {{/}}
+                        </span>
                         {{else}}
                         <span>0m 0s</span>
                         {{/audio.canplay}}
                     </td>
                     <td>
-                        <input type="range" min="0" max="{{audio.duration}}" step="1" value="{{audio.currentTime}}" />
+                        <input type="range" min="0" max="{{audio.duration}}"
+                            step="1" value="{{audio.currentTime}}" />
                     </td>
                     <td>
                         {{#audio.canplay}}
-                        <span>{{# nice_time.minutes_and_seconds(audio.duration) }}{{.min.replace(' ', '')}} {{.sec.replace(' ', '')}}{{/}}</span>
+                        <span>
+                        {{# nice_time.minutes_and_seconds(audio.duration) }}
+                            {{.min.replace(' ', '')}} {{.sec.replace(' ', '')}}
+                        {{/}}
+                        </span>
                         {{else}}
                         <span>0m 0s</span>
                         {{/audio.canplay}}
@@ -43,16 +52,16 @@
         </section>
 
         <section class="buttons">
-            <svg class="prev" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+            <svg class="prev" viewBox="0 0 32 32">
                 <path d="M0 0 H4 V14 L32 0 V32 L4 18 V32 H0 z" />
             </svg>
-            <svg class="play" on-click="play()" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+            <svg class="play" on-click="play()" viewBox="0 0 32 32">
                 <path d="M0 0 L32 16 L0 32 z" />
             </svg>
-            <svg class="pause" on-click="pause()" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+            <svg class="pause" on-click="pause()" viewBox="0 0 32 32">
                 <path d="M0 0 H12 V32 H0 z M20 0 H32 V32 H20 z" />
             </svg>
-            <svg class="next" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+            <svg class="next" viewBox="0 0 32 32">
                 <path d="M0 0 L28 14 V0 H32 V32 H28 V18 L0 32 z" />
             </svg>
         </section>
