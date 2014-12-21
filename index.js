@@ -43,6 +43,7 @@ if (browser) {
 
     player.audio.addEventListener('loadstart', function (ev) {
         console.log('loading');
+        player.audio.canplay = false;
     });
 
     player.audio.addEventListener('seeking', function (ev) {
