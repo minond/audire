@@ -1,11 +1,11 @@
 input[type="range"] {
     -webkit-appearance: none;
+    background: rgb(98, 98, 98);
     border: 0;
     height: 2px;
-    padding: 0;
     margin: 0;
-    background: rgb(98, 98, 98);
     outline: 0;
+    padding: 0;
     width: 100%;
 }
 
@@ -13,29 +13,19 @@ input[type='range']::-webkit-slider-thumb {
     -webkit-appearance: none;
     background-color: #ecf0f1;
     border: 0;
-    width: 6px;
-    height: 20px;
     cursor: pointer;
+    height: 20px;
+    width: 6px;
 }
 
 .player {
-    cursor: default;
-    transition: background-position-y .3s;
-    border-radius: 50%;
-    overflow: hidden;
     background-position: 50%;
-
+    border-radius: 50%;
+    cursor: default;
     height: 100%;
-    width: 100%;
-
-    /* margin: auto; */
+    overflow: hidden;
     position: relative;
-    /* top: 50%; */
-    /* transform: translateY(-50%); */
-}
-
-.player:hover {
-    /* background-position-y: -50px; */
+    width: 100%;
 }
 
 .player:hover .controls {
@@ -43,18 +33,18 @@ input[type='range']::-webkit-slider-thumb {
 }
 
 .player .controls {
-    transition: bottom 1s;
-    bottom: -200px;
-    bottom: 0;
-    position: absolute;
     background: rgba(15, 13, 13, .6);
+    bottom: -200px;
+    /* bottom: 0; */
+    color: rgb(245, 245, 215);
+    font-family: monospace;
+    font-size: 12px;
     height: 120px;
     left: 0;
-    right: 0;
     padding: 25px 35px 0 35px;
-    color: rgb(245, 245, 215);
-    font-size: 12px;
-    font-family: monospace;
+    position: absolute;
+    right: 0;
+    transition: bottom .6s;
 }
 
 .player .controls table {
@@ -77,13 +67,13 @@ input[type='range']::-webkit-slider-thumb {
 }
 
 .player .controls .buttons {
-    text-align: center;
     margin-top: 10px;
+    text-align: center;
 }
 
 .player .controls .buttons svg {
-    fill: currentColor;
     cursor: pointer;
+    fill: currentColor;
     height: 30px;
     width: 45px;
 }
