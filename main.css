@@ -1,9 +1,9 @@
 .player {
     cursor: default;
-    height: 100%;
-    overflow: hidden;
     position: relative;
-    width: 100%;
+    font-family: monospace;
+    font-size: 12px;
+    color: rgb(245, 245, 215);
 }
 
 .player .artwork {
@@ -14,18 +14,18 @@
     z-index: 0;
 }
 
+.player.state-playing .artwork {
+    opacity: 1;
+}
+
 .player .controls {
     background: rgba(15, 13, 13, .6);
     bottom: 0;
-    color: rgb(245, 245, 215);
-    font-family: monospace;
-    font-size: 12px;
     height: 120px;
     left: 0;
     padding: 25px 35px 0 35px;
     position: absolute;
     right: 0;
-    transition: bottom .6s;
     z-index: 1;
 }
 
@@ -50,9 +50,13 @@
     width: 2px;
 }
 
+.player.state-ended .controls input[type='range']::-webkit-slider-thumb {
+    height: 0;
+    width: 0;
+}
+
 .player .controls table {
     color: inherit;
-    font: inherit;
     width: 100%;
 }
 
@@ -80,15 +84,6 @@
     fill: currentColor;
     height: 25px;
     margin: 0 6px;
-}
-
-.player.state-ended .controls input[type='range']::-webkit-slider-thumb {
-    height: 0;
-    width: 0;
-}
-
-.player.state-playing .artwork {
-    opacity: 1;
 }
 
 .player.state-playing .controls .buttons .play,
