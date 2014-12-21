@@ -12,6 +12,6 @@ install: dependencies
 	npm install
 
 build: install
-	$(NPM_BIN)/browserify index.js -o build/out.js
+	$(NPM_BIN)/browserify index.js -o build/out.js -t brfs
 
 lint: install js-lint
