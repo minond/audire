@@ -40,11 +40,11 @@
 
 .player .controls input[type='range']::-webkit-slider-thumb {
     -webkit-appearance: none;
-    background-color: #ecf0f1;
+    background-color: #EAE5B2;
     border: 0;
     cursor: pointer;
     height: 20px;
-    width: 6px;
+    width: 2px;
 }
 
 .player .controls table {
@@ -68,14 +68,14 @@
 }
 
 .player .controls .buttons {
-    margin-top: 10px;
+    margin-top: 23px;
     text-align: center;
 }
 
 .player .controls .buttons svg {
     cursor: pointer;
     fill: currentColor;
-    height: 30px;
+    height: 25px;
     margin: 0 6px;
 }
 
