@@ -6,13 +6,11 @@
 <pre>{{song.title}} by {{song.artist}}</pre>
 <pre>{{JSON.stringify(song, null, '  ')}}</pre>-->
 
-<div style="background-image: url({{song.artwork_url}})"
-    class="player
-        {{#audio.canplay}}state-canplay{{/}}
-        {{#audio.paused}}state-paused{{/}}
-        {{^audio.paused}}state-playing{{/}}
-        {{#audio.seeking}}state-seeking{{/}}
-    "
+<div class="player
+    {{#audio.canplay}}state-canplay{{/}}
+    {{#audio.paused}}state-paused{{/}}
+    {{^audio.paused}}state-playing{{/}}
+    {{#audio.seeking}}state-seeking{{/}}"
 >
     <div class="controls">
         <section class="track">
@@ -66,4 +64,5 @@
             </svg>
         </section>
     </div>
+    <div class="artwork" style="background-image: url({{song.artwork_url}})"></div>
 </div>
