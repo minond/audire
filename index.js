@@ -35,9 +35,6 @@ if (browser) {
         }
     });
 
-    window.player = player;
-    window.ractive = ractive;
-
     player.on('play', function (song) {
         ractive.update('song');
     });
@@ -54,7 +51,6 @@ if (browser) {
     player.audio.addEventListener('canplay', function (ev) {
         console.log('done loading');
         player.audio.canplay = true;
-        // player.audio.currentTime = 60;
     });
 
     player.audio.addEventListener('ended', function (ev) {
@@ -62,7 +58,6 @@ if (browser) {
     });
 
     player.audio.addEventListener('timeupdate', function (ev) {
-        // console.log(ev.target.currentTime.toString(), '/', ev.target.duration.toString());
         ractive.update('audio');
     });
 }
