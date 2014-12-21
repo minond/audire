@@ -31,6 +31,6 @@ Player.prototype.play = function (url) {
  */
 Player.prototype.setPlaylist = function (songs) {
     this.playlist = songs;
-}
+};
 
 module.exports = Player;
