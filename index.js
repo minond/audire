@@ -21,8 +21,9 @@ var fs = require('fs');
 if (browser) {
     player = new Player(document);
 
+    Ractive.defaults.data.nice_time = require('a-nice-time');
     ractive = new Ractive({
-        el: 'body',
+        el: '#player',
         template: fs.readFileSync('./player.html').toString(),
         data: player
     });
@@ -33,8 +34,8 @@ if (browser) {
     btn_play = document.querySelector('#play');
     btn_pause = document.querySelector('#pause');
 
-    btn_play.addEventListener('click', player.audio.play.bind(player.audio));
-    btn_pause.addEventListener('click', player.audio.pause.bind(player.audio));
+    // btn_play.addEventListener('click', player.audio.play.bind(player.audio));
+    // btn_pause.addEventListener('click', player.audio.pause.bind(player.audio));
 
     player.on('play', function (song) {
         ractive.update('song');

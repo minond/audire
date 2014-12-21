@@ -8,6 +8,7 @@
     "jsmin": "^1.0.1"
   },
   "dependencies": {
+    "a-nice-time": "^1.0.1",
     "brfs": "^1.2.0",
     "browser-request": "^0.3.3",
     "browserify": "^7.0.3",

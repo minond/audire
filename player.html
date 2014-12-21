@@ -1,9 +1,20 @@
-<input type="button" id="play" value="play" />
+<!--<input type="button" id="play" value="play" />
 <input type="button" id="pause" value="pause" />
-<br>
-<img src="{{song.artwork_url}}" />
-<br>
 <pre>{{audio.paused}}</pre>
-<pre>{{audio.currentTime}}</pre>
+<pre>{{audio.currentTime}} / {{audio.duration}}</pre>
+<pre>{{audio.currentTime / audio.duration * 100}}</pre>
 <pre>{{song.title}} by {{song.artist}}</pre>
-<pre>{{JSON.stringify(song, null, '  ')}}</pre>
+<pre>{{JSON.stringify(song, null, '  ')}}</pre>-->
+
+<div class="player" style="background-image: url({{song.artwork_url}})">
+    <div class="controls">
+        <table>
+            <tr>
+                <td>{{# nice_time.minutes_and_seconds(audio.currentTime) }}{{.min}} {{.sec}}{{/}}</td>
+                <td>
+                    <input type="range" min="0" max="{{audio.duration}}" step="1" value="{{audio.currentTime}}" />
+                </td>
+                <td>{{# nice_time.minutes_and_seconds(audio.duration) }}{{.min}} {{.sec}}{{/}}</td>
+            </tr>
+    </div>
+</div>
