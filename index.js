@@ -8,7 +8,7 @@ var soundcloud = new Soundcloud('96b942eb086a5093d4ea08ab69c5a16b');
 
 var player, btn_play, btn_pause, ractive;
 
-soundcloud.getSong('165098282').then(function (song) {
+soundcloud.getSong('180559953').then(function (song) {
     console.log(song);
 
     if (browser) {
@@ -51,6 +51,7 @@ if (browser) {
 
     player.audio.addEventListener('canplay', function (ev) {
         console.log('done loading');
+        player.song.canplay = true;
         // player.audio.currentTime = 60;
     });
 
