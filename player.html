@@ -1,11 +1,3 @@
-<!--<input type="button" id="play" value="play" />
-<input type="button" id="pause" value="pause" />
-<pre>{{audio.paused}}</pre>
-<pre>{{audio.currentTime}} / {{audio.duration}}</pre>
-<pre>{{audio.currentTime / audio.duration * 100}}</pre>
-<pre>{{song.title}} by {{song.artist}}</pre>
-<pre>{{JSON.stringify(song, null, '  ')}}</pre>-->
-
 <div class="player
     {{#audio.canplay}}state-canplay{{/}}
     {{#audio.ended}}state-ended{{/}}
@@ -13,6 +5,10 @@
     {{^audio.paused}}state-playing{{/}}
     {{#audio.seeking}}state-seeking{{/}}"
 >
+    <section class="info">
+        <div class="title">{{song.title}}</div>
+        <div class="artist">{{song.artist}}</div>
+    </section>
     <div class="controls">
         <section class="track">
             <table>
@@ -46,9 +42,6 @@
                 </tr>
             </table>
         </sction>
-
-        <section class="info">
-        </section>
 
         <section class="buttons">
             <svg class="prev clickable" viewBox="0 0 32 32">
