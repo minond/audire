@@ -41,6 +41,7 @@ if (browser) {
 
     player.audio.addEventListener('loadstart', function (ev) {
         console.log('loading');
+        player.audio.loading = true;
         player.audio.canplay = false;
     });
 
@@ -52,6 +53,7 @@ if (browser) {
 
     player.audio.addEventListener('canplay', function (ev) {
         console.log('done loading');
+        player.audio.loading = false;
         player.audio.seeking = false;
         player.audio.canplay = true;
         ractive.update('audio');

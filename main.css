@@ -126,7 +126,7 @@
 }
 
 .player.state-seeking .loader,
-.player:not(.state-canplay) .loader {
+.player.state-loading .loader {
     display: initial;
 }
 
