@@ -12,7 +12,7 @@ soundcloud.getSong('180559953').then(function (song) {
     console.log(song);
 
     if (browser) {
-        player.play(song);
+        // player.play(song);
     }
 });
 
@@ -24,7 +24,7 @@ if (browser) {
 
     ractive = new Ractive({
         el: '#player',
-        template: fs.readFileSync('./player.html').toString(),
+        template: fs.readFileSync('./players/simple/index.html').toString(),
         data: player,
         player: player,
         play: function () {
