@@ -12,7 +12,7 @@ soundcloud.getSong('180559953').then(function (song) {
     console.log(song);
 
     if (browser) {
-        // player.play(song);
+        player.play(song);
     }
 });
 
