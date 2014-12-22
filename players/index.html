@@ -1,0 +1,77 @@
+<div class="player
+    {{#audio.canplay}}state-canplay{{/}}
+    {{#audio.ended}}state-ended{{/}}
+    {{#audio.paused}}state-paused{{/}}
+    {{^audio.paused}}state-playing{{/}}
+    {{#audio.loading}}state-loading{{/}}
+    {{#audio.seeking}}state-seeking{{/}}"
+>
+    <section class="info">
+        <div class="title">{{song.title}}</div>
+        <div class="artist">{{song.artist}}</div>
+    </section>
+
+    <div class="controls">
+        <section class="track">
+            <table>
+                <tr>
+                    <td>
+                        {{#audio.canplay}}
+                        <span>
+                        {{# nice_time.minutes_and_seconds(audio.currentTime) }}
+                            {{.min.replace(' ', '')}} {{.sec.replace(' ', '')}}
+                        {{/}}
+                        </span>
+                        {{else}}
+                        <span>0m 0s</span>
+                        {{/audio.canplay}}
+                    </td>
+                    <td>
+                        <input type="range" min="0" max="{{audio.duration}}"
+                            step="1" value="{{audio.currentTime}}" class="clickable" />
+                    </td>
+                    <td>
+                        {{#audio.canplay}}
+                        <span>
+                        {{# nice_time.minutes_and_seconds(audio.duration) }}
+                            {{.min.replace(' ', '')}} {{.sec.replace(' ', '')}}
+                        {{/}}
+                        </span>
+                        {{else}}
+                        <span>0m 0s</span>
+                        {{/audio.canplay}}
+                    </td>
+                </tr>
+            </table>
+        </sction>
+
+        <section class="buttons">
+            <svg class="prev clickable" viewBox="0 0 32 32">
+                <path d="M0 0 H4 V14 L32 0 V32 L4 18 V32 H0 z" />
+            </svg>
+            <svg class="play clickable move-left" on-click="play()" viewBox="0 0 32 32">
+                <path d="M0 0 L32 16 L0 32 z" />
+            </svg>
+            <svg class="pause clickable" on-click="pause()" viewBox="0 0 32 32">
+                <path d="M0 0 H12 V32 H0 z M20 0 H32 V32 H20 z" />
+            </svg>
+            <svg class="next clickable" viewBox="0 0 32 32">
+                <path d="M0 0 L28 14 V0 H32 V32 H28 V18 L0 32 z" />
+            </svg>
+        </section>
+    </div>
+
+    <div class="artwork" style="
+        background-image: url({{song.artwork_url}});
+        background-position-x: {{ parseInt(audio.currentTime / audio.duration * 100) }}%;
+    "></div>
+
+    <div class="loader">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" fill="white">
+            <path opacity=".25" d="M16 0 A16 16 0 0 0 16 32 A16 16 0 0 0 16 0 M16 4 A12 12 0 0 1 16 28 A12 12 0 0 1 16 4" />
+            <path d="M16 0 A16 16 0 0 1 32 16 L28 16 A12 12 0 0 0 16 4z">
+                <animateTransform attributeName="transform" type="rotate" from="0 16 16" to="360 16 16" dur="0.8s" repeatCount="indefinite" />
+            </path>
+        </svg>
+    </div>
+</div>
