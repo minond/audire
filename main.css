@@ -18,6 +18,7 @@
 
 .player .artwork {
     background-position-y: 50%;
+    background-size: 200%;
     height: 100%;
     opacity: .5;
     transition: opacity .4s, background-position .5s;
@@ -99,8 +100,8 @@
 
 .player .controls .buttons svg {
     fill: currentColor;
-    height: 25%;
-    margin: 0 2%;
+    height: 20%;
+    margin: 0 1.5%;
 }
 
 .player.state-playing .controls .buttons .play,
