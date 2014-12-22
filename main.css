@@ -41,6 +41,7 @@
     z-index: 1;
 }
 
+.player.state-seeking .controls,
 .player:not(.state-playing) .controls,
 .player:hover .controls {
     bottom: 0;
@@ -110,9 +111,23 @@
 .player .info {
     padding: 11px;
     position: absolute;
-    text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+    text-shadow: -1px 0 rgb(24, 7, 7), 0 1px rgb(24, 7, 7), 1px 0 rgb(24, 7, 7), 0 -1px rgb(24, 7, 7);
     top: 0;
     z-index: 1;
+}
+
+.player .loader {
+    display: none;
+    position: absolute;
+    text-align: center;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 100%;
+}
+
+.player.state-seeking .loader,
+.player:not(.state-canplay) .loader {
+    display: initial;
 }
 
 .player .clickable {
