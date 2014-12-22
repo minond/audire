@@ -1,6 +1,7 @@
 .player {
     background-color: rgb(24, 7, 7);
     border: 1px solid rgb(195, 195, 195);
+    box-shadow: 0px 0px 8px rgb(152, 150, 141);
     color: rgb(245, 245, 215);
     cursor: default;
     font-family: monospace;
