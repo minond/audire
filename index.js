@@ -46,11 +46,15 @@ if (browser) {
 
     player.audio.addEventListener('seeking', function (ev) {
         console.log('seeking');
+        player.audio.seeking = true;
+        ractive.update('audio');
     });
 
     player.audio.addEventListener('canplay', function (ev) {
         console.log('done loading');
+        player.audio.seeking = false;
         player.audio.canplay = true;
+        ractive.update('audio');
     });
 
     player.audio.addEventListener('ended', function (ev) {

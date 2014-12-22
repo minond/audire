@@ -7,6 +7,13 @@
     font-size: 12px;
     overflow: hidden;
     position: relative;
+
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 .player .artwork {
@@ -85,7 +92,7 @@
 .player .controls .buttons {
     position: relative;
     text-align: center;
-    top: 60%;
+    top: 45%;
     transform: translateY(-100%);
 }
 
@@ -98,17 +105,6 @@
 .player.state-playing .controls .buttons .play,
 .player.state-paused .controls .buttons .pause {
     display: none;
-}
-
-.player .circle {
-    border-radius: 50%;
-    border: 3px solid;
-    box-sizing: border-box;
-    display: inline-block;
-    height: auto;
-    padding: 4%;
-    text-align: center;
-    width: auto;
 }
 
 .player .clickable {
