@@ -65,5 +65,8 @@
             </svg>
         </section>
     </div>
-    <div class="artwork" style="background-image: url({{song.artwork_url}})"></div>
+    <div class="artwork" style="
+        background-image: url({{song.artwork_url}});
+        background-position-x: {{ parseInt(audio.currentTime / audio.duration * 100) }}%;
+    "></div>
 </div>
