@@ -24,7 +24,7 @@ if (browser) {
 
     ractive = new Ractive({
         el: '#player',
-        template: fs.readFileSync('./players/index.html').toString(),
+        template: fs.readFileSync('./player/index.html').toString(),
         data: player,
         player: player,
         play: function () {
