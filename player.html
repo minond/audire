@@ -30,7 +30,7 @@
                     </td>
                     <td>
                         <input type="range" min="0" max="{{audio.duration}}"
-                            step="1" value="{{audio.currentTime}}" />
+                            step="1" value="{{audio.currentTime}}" class="clickable" />
                     </td>
                     <td>
                         {{#audio.canplay}}
@@ -51,16 +51,20 @@
         </section>
 
         <section class="buttons">
-            <svg class="prev" viewBox="0 0 32 32">
+            <svg class="prev clickable" viewBox="0 0 32 32">
                 <path d="M0 0 H4 V14 L32 0 V32 L4 18 V32 H0 z" />
             </svg>
-            <svg class="play" on-click="play()" viewBox="0 0 32 32">
-                <path d="M0 0 L32 16 L0 32 z" />
-            </svg>
-            <svg class="pause" on-click="pause()" viewBox="0 0 32 32">
-                <path d="M0 0 H12 V32 H0 z M20 0 H32 V32 H20 z" />
-            </svg>
-            <svg class="next" viewBox="0 0 32 32">
+            <div class="circle play clickable" on-click="play()">
+                <svg class="move-left" viewBox="0 0 32 32">
+                    <path d="M0 0 L32 16 L0 32 z" />
+                </svg>
+            </div>
+            <div class="circle pause clickable" on-click="pause()">
+                <svg viewBox="0 0 32 32">
+                    <path d="M0 0 H12 V32 H0 z M20 0 H32 V32 H20 z" />
+                </svg>
+            </div>
+            <svg class="next clickable" viewBox="0 0 32 32">
                 <path d="M0 0 L28 14 V0 H32 V32 H28 V18 L0 32 z" />
             </svg>
         </section>

@@ -43,7 +43,6 @@
     -webkit-appearance: none;
     background: rgb(98, 98, 98);
     border: 0;
-    cursor: pointer;
     height: 2px;
     margin: 0;
     outline: 0;
@@ -55,7 +54,6 @@
     -webkit-appearance: none;
     background-color: #EAE5B2;
     border: 0;
-    cursor: pointer;
     height: 20px;
     width: 2px;
 }
@@ -87,12 +85,11 @@
 .player .controls .buttons {
     position: relative;
     text-align: center;
-    top: 50%;
+    top: 60%;
     transform: translateY(-100%);
 }
 
 .player .controls .buttons svg {
-    cursor: pointer;
     fill: currentColor;
     height: 25%;
     margin: 0 2%;
@@ -101,4 +98,24 @@
 .player.state-playing .controls .buttons .play,
 .player.state-paused .controls .buttons .pause {
     display: none;
+}
+
+.player .circle {
+    border-radius: 50%;
+    border: 3px solid;
+    box-sizing: border-box;
+    display: inline-block;
+    height: auto;
+    padding: 4%;
+    text-align: center;
+    width: auto;
+}
+
+.player .clickable {
+    cursor: pointer;
+}
+
+.player .move-left {
+    left: 3px;
+    position: relative;
 }
