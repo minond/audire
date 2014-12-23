@@ -62,8 +62,8 @@ Player.prototype.next = function () {
  * @return {Player}
  */
 Player.prototype.prev = function () {
-    var curr = this.playlist.indexOf(this.song) - 1,
-        prev = curr % this.playlist.length;
+    var curr = this.playlist.indexOf(this.song),
+        prev = curr ? curr - 1 : this.playlist.length - 1;
 
     return this.load(this.playlist[ prev ]);
 };
