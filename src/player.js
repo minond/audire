@@ -18,11 +18,11 @@ function Player(doc) {
 inherits(Player, EventEmitter);
 
 /**
- * @method play
+ * @method load
  * @param {Song} song
  * @return {Player}
  */
-Player.prototype.play = function (song) {
+Player.prototype.load = function (song) {
     this.song = song;
     this.audio.src = song.stream_url;
     this.audio.play();
