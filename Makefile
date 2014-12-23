@@ -17,7 +17,6 @@ install: dependencies
 
 build: install
 	if [ ! -d build ]; then mkdir build; fi
-	$(NPM_BIN)/browserify index.js -o build/player.js -t brfs
-	$(NPM_BIN)/lessc player/styles.less > build/player.css
+	$(NPM_BIN)/browserify index.js -o build/player.js -t brfs -t node-lessify
 
 lint: install js-lint

@@ -17,4 +17,6 @@ Q.all([
     soundcloud.getSong('180559953')
 ]).then(player.setPlaylist.bind(player));
 
+require('./player/styles.less');
+
 ui('#player', player);
