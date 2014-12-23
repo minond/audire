@@ -77,7 +77,7 @@
 
     <div class="playlist playlist-len-{{playlist.length}}">
         {{#playlist}}
-        <div on-click="load(this)">
+        <div on-click="load(this)" class="{{#if (song === this)}}selected{{/if}}">
             <img src="{{this.artwork_url}}" />
             <span>{{this.title}} - {{this.artist}}</span>
         </div>
