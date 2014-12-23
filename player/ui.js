@@ -18,6 +18,8 @@ function ui(append_to, player) {
         template: template,
         data: player,
         load: player.load.bind(player),
+        next: player.next.bind(player),
+        prev: player.prev.bind(player),
         play: player.audio.play.bind(player.audio),
         pause: player.audio.pause.bind(player.audio)
     });

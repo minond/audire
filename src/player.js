@@ -13,6 +13,7 @@ function Player(doc) {
     this.song = null;
     this.audio = doc.createElement('audio');
     doc.body.appendChild(this.audio);
+    window.player = this;
 }
 
 inherits(Player, EventEmitter);
@@ -43,6 +44,28 @@ Player.prototype.setPlaylist = function (songs) {
     }
 
     return this;
+};
+
+/**
+ * @method next
+ * @return {Player}
+ */
+Player.prototype.next = function () {
+    var curr = this.playlist.indexOf(this.song) + 1,
+        next = curr % this.playlist.length;
+
+    return this.load(this.playlist[ next ]);
+};
+
+/**
+ * @method prev
+ * @return {Player}
+ */
+Player.prototype.prev = function () {
+    var curr = this.playlist.indexOf(this.song) - 1,
+        prev = curr % this.playlist.length;
+
+    return this.load(this.playlist[ prev ]);
 };
 
 module.exports = Player;
