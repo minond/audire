@@ -36,6 +36,13 @@ Player.prototype.load = function (song) {
  */
 Player.prototype.setPlaylist = function (songs) {
     this.playlist = songs;
+    this.emit('playlist', songs);
+
+    if (songs.length) {
+        this.load(songs[0]);
+    }
+
+    return this;
 };
 
 module.exports = Player;

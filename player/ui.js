@@ -17,14 +17,19 @@ function ui(append_to, player) {
         el: append_to,
         template: template,
         data: player,
+        load: player.load.bind(player),
         play: player.audio.play.bind(player.audio),
         pause: player.audio.pause.bind(player.audio)
     });
 
     player.nice_time = require('a-nice-time');
 
-    player.on('play', function (song) {
+    player.on('play', function () {
         ui.update('song');
+    });
+
+    player.on('playlist', function () {
+        ui.update('playlist');
     });
 
     player.audio.addEventListener('seeking', function (ev) {

@@ -12,6 +12,46 @@
     overflow: hidden;
     position: relative;
 
+    .playlist {
+        background-color: #FDFFEE;
+        max-height: 400px;
+        overflow-y: auto;
+        padding: 10px;
+
+        div {
+            cursor: pointer;
+            height: 25px;
+            padding-bottom: 5px;
+        }
+
+        div:last-child {
+            padding: 0;
+        }
+
+        div:hover {
+            span {
+                text-decoration: underline;
+            }
+        }
+
+        img {
+            height: 100%;
+            width: auto;
+        }
+
+        span {
+            color: rgb(55, 51, 51);
+            display: inline-block;
+            margin-top: 5px;
+            vertical-align: top;
+        }
+
+        &.playlist-len-,
+        &.playlist-len-0 {
+            display: none;
+        }
+    }
+
     .artwork {
         .background-size(200%);
         .opacity(.5);

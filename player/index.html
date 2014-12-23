@@ -74,4 +74,13 @@
             </svg>
         </div>
     </div>
+
+    <div class="playlist playlist-len-{{playlist.length}}">
+        {{#playlist}}
+        <div on-click="load(this)">
+            <img src="{{this.artwork_url}}" />
+            <span>{{this.title}} - {{this.artist}}</span>
+        </div>
+        {{/playlist}}
+    </div>
 </div>
