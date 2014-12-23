@@ -1,6 +1,6 @@
-[submodule ".scaffold"]
-	path = .scaffold
-	url = http://github.com/minond/scaffold
 [submodule "player/vendor/less-prefixer"]
 	path = player/vendor/less-prefixer
 	url = https://github.com/minond/LESS-Prefixer.git
+[submodule ".scaffold"]
+	path = .scaffold
+	url = https://github.com/minond/scaffold
