@@ -1,6 +1,11 @@
 {
   "name": "audire",
   "version": "1.0.0",
+  "description": "just playing around",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/minond/audire.git"
+  },
   "devDependencies": {
     "complexity-report": "^1.0.6",
     "jscs": "^1.7.3",
