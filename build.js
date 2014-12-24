@@ -68242,23 +68242,21 @@ function ui(append_to, player) {
         ui.update('playlist');
     });
 
-    player.audio.addEventListener('seeking', function (ev) {
-        player.audio.seeking = true;
+    player.audio.addEventListener('seeking', function () {
         ui.update('audio');
     });
 
-    player.audio.addEventListener('canplay', function (ev) {
+    player.audio.addEventListener('canplay', function () {
         player.audio.loading = false;
-        player.audio.seeking = false;
         player.audio.canplay = true;
         ui.update('audio');
     });
 
-    player.audio.addEventListener('timeupdate', function (ev) {
+    player.audio.addEventListener('timeupdate', function () {
         ui.update('audio');
     });
 
-    player.audio.addEventListener('loadstart', function (ev) {
+    player.audio.addEventListener('loadstart', function () {
         player.audio.loading = true;
         player.audio.canplay = false;
         ui.update('song');
