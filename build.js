@@ -9170,11 +9170,12 @@ var ieee754 = require('ieee754')
 var isArray = require('is-array')
 
 exports.Buffer = Buffer
-exports.SlowBuffer = Buffer
+exports.SlowBuffer = SlowBuffer
 exports.INSPECT_MAX_BYTES = 50
 Buffer.poolSize = 8192 // not used by this implementation
 
 var kMaxLength = 0x3fffffff
+var rootParent = {}
 
 /**
  * If `Buffer.TYPED_ARRAY_SUPPORT`:
@@ -9234,8 +9235,6 @@ function Buffer (subject, encoding, noZero) {
   if (type === 'number')
     length = subject > 0 ? subject >>> 0 : 0
   else if (type === 'string') {
-    if (encoding === 'base64')
-      subject = base64clean(subject)
     length = Buffer.byteLength(subject, encoding)
   } else if (type === 'object' && subject !== null) { // assume object is array-like
     if (subject.type === 'Buffer' && isArray(subject.data))
@@ -9244,7 +9243,7 @@ function Buffer (subject, encoding, noZero) {
   } else
     throw new TypeError('must start with number, buffer, array or string')
 
-  if (this.length > kMaxLength)
+  if (length > kMaxLength)
     throw new RangeError('Attempt to allocate Buffer larger than maximum ' +
       'size: 0x' + kMaxLength.toString(16) + ' bytes')
 
@@ -9280,6 +9279,18 @@ function Buffer (subject, encoding, noZero) {
     }
   }
 
+  if (length > 0 && length <= Buffer.poolSize)
+    buf.parent = rootParent
+
+  return buf
+}
+
+function SlowBuffer(subject, encoding, noZero) {
+  if (!(this instanceof SlowBuffer))
+    return new SlowBuffer(subject, encoding, noZero)
+
+  var buf = new Buffer(subject, encoding, noZero)
+  delete buf.parent
   return buf
 }
 
@@ -9430,7 +9441,7 @@ Buffer.prototype.toString = function (encoding, start, end) {
 }
 
 Buffer.prototype.equals = function (b) {
-  if(!Buffer.isBuffer(b)) throw new TypeError('Argument must be a Buffer')
+  if (!Buffer.isBuffer(b)) throw new TypeError('Argument must be a Buffer')
   return Buffer.compare(this, b) === 0
 }
 
@@ -9490,7 +9501,7 @@ function hexWrite (buf, string, offset, length) {
 }
 
 function utf8Write (buf, string, offset, length) {
-  var charsWritten = blitBuffer(utf8ToBytes(string), buf, offset, length)
+  var charsWritten = blitBuffer(utf8ToBytes(string, buf.length - offset), buf, offset, length)
   return charsWritten
 }
 
@@ -9509,7 +9520,7 @@ function base64Write (buf, string, offset, length) {
 }
 
 function utf16leWrite (buf, string, offset, length) {
-  var charsWritten = blitBuffer(utf16leToBytes(string), buf, offset, length, 2)
+  var charsWritten = blitBuffer(utf16leToBytes(string, buf.length - offset), buf, offset, length, 2)
   return charsWritten
 }
 
@@ -9529,6 +9540,10 @@ Buffer.prototype.write = function (string, offset, length, encoding) {
   }
 
   offset = Number(offset) || 0
+
+  if (length < 0 || offset < 0 || offset > this.length)
+    throw new RangeError('attempt to write outside buffer bounds');
+
   var remaining = this.length - offset
   if (!length) {
     length = remaining
@@ -9607,13 +9622,19 @@ function asciiSlice (buf, start, end) {
   end = Math.min(buf.length, end)
 
   for (var i = start; i < end; i++) {
-    ret += String.fromCharCode(buf[i])
+    ret += String.fromCharCode(buf[i] & 0x7F)
   }
   return ret
 }
 
 function binarySlice (buf, start, end) {
-  return asciiSlice(buf, start, end)
+  var ret = ''
+  end = Math.min(buf.length, end)
+
+  for (var i = start; i < end; i++) {
+    ret += String.fromCharCode(buf[i])
+  }
+  return ret
 }
 
 function hexSlice (buf, start, end) {
@@ -9662,16 +9683,21 @@ Buffer.prototype.slice = function (start, end) {
   if (end < start)
     end = start
 
+  var newBuf
   if (Buffer.TYPED_ARRAY_SUPPORT) {
-    return Buffer._augment(this.subarray(start, end))
+    newBuf = Buffer._augment(this.subarray(start, end))
   } else {
     var sliceLen = end - start
-    var newBuf = new Buffer(sliceLen, undefined, true)
+    newBuf = new Buffer(sliceLen, undefined, true)
     for (var i = 0; i < sliceLen; i++) {
       newBuf[i] = this[i + start]
     }
-    return newBuf
   }
+
+  if (newBuf.length)
+    newBuf.parent = this.parent || this
+
+  return newBuf
 }
 
 /*
@@ -9682,6 +9708,35 @@ function checkOffset (offset, ext, length) {
     throw new RangeError('offset is not uint')
   if (offset + ext > length)
     throw new RangeError('Trying to access beyond buffer length')
+}
+
+Buffer.prototype.readUIntLE = function (offset, byteLength, noAssert) {
+  offset = offset >>> 0
+  byteLength = byteLength >>> 0
+  if (!noAssert)
+    checkOffset(offset, byteLength, this.length)
+
+  var val = this[offset]
+  var mul = 1
+  var i = 0
+  while (++i < byteLength && (mul *= 0x100))
+    val += this[offset + i] * mul
+
+  return val
+}
+
+Buffer.prototype.readUIntBE = function (offset, byteLength, noAssert) {
+  offset = offset >>> 0
+  byteLength = byteLength >>> 0
+  if (!noAssert)
+    checkOffset(offset, byteLength, this.length)
+
+  var val = this[offset + --byteLength]
+  var mul = 1
+  while (byteLength > 0 && (mul *= 0x100))
+    val += this[offset + --byteLength] * mul;
+
+  return val
 }
 
 Buffer.prototype.readUInt8 = function (offset, noAssert) {
@@ -9720,6 +9775,44 @@ Buffer.prototype.readUInt32BE = function (offset, noAssert) {
       ((this[offset + 1] << 16) |
       (this[offset + 2] << 8) |
       this[offset + 3])
+}
+
+Buffer.prototype.readIntLE = function (offset, byteLength, noAssert) {
+  offset = offset >>> 0
+  byteLength = byteLength >>> 0
+  if (!noAssert)
+    checkOffset(offset, byteLength, this.length)
+
+  var val = this[offset]
+  var mul = 1
+  var i = 0
+  while (++i < byteLength && (mul *= 0x100))
+    val += this[offset + i] * mul
+  mul *= 0x80
+
+  if (val >= mul)
+    val -= Math.pow(2, 8 * byteLength)
+
+  return val
+}
+
+Buffer.prototype.readIntBE = function (offset, byteLength, noAssert) {
+  offset = offset >>> 0
+  byteLength = byteLength >>> 0
+  if (!noAssert)
+    checkOffset(offset, byteLength, this.length)
+
+  var i = byteLength
+  var mul = 1
+  var val = this[offset + --i]
+  while (i > 0 && (mul *= 0x100))
+    val += this[offset + --i] * mul
+  mul *= 0x80
+
+  if (val >= mul)
+    val -= Math.pow(2, 8 * byteLength)
+
+  return val
 }
 
 Buffer.prototype.readInt8 = function (offset, noAssert) {
@@ -9790,8 +9883,40 @@ Buffer.prototype.readDoubleBE = function (offset, noAssert) {
 
 function checkInt (buf, value, offset, ext, max, min) {
   if (!Buffer.isBuffer(buf)) throw new TypeError('buffer must be a Buffer instance')
-  if (value > max || value < min) throw new TypeError('value is out of bounds')
-  if (offset + ext > buf.length) throw new TypeError('index out of range')
+  if (value > max || value < min) throw new RangeError('value is out of bounds')
+  if (offset + ext > buf.length) throw new RangeError('index out of range')
+}
+
+Buffer.prototype.writeUIntLE = function (value, offset, byteLength, noAssert) {
+  value = +value
+  offset = offset >>> 0
+  byteLength = byteLength >>> 0
+  if (!noAssert)
+    checkInt(this, value, offset, byteLength, Math.pow(2, 8 * byteLength), 0)
+
+  var mul = 1
+  var i = 0
+  this[offset] = value & 0xFF
+  while (++i < byteLength && (mul *= 0x100))
+    this[offset + i] = (value / mul) >>> 0 & 0xFF
+
+  return offset + byteLength
+}
+
+Buffer.prototype.writeUIntBE = function (value, offset, byteLength, noAssert) {
+  value = +value
+  offset = offset >>> 0
+  byteLength = byteLength >>> 0
+  if (!noAssert)
+    checkInt(this, value, offset, byteLength, Math.pow(2, 8 * byteLength), 0)
+
+  var i = byteLength - 1
+  var mul = 1
+  this[offset + i] = value & 0xFF
+  while (--i >= 0 && (mul *= 0x100))
+    this[offset + i] = (value / mul) >>> 0 & 0xFF
+
+  return offset + byteLength
 }
 
 Buffer.prototype.writeUInt8 = function (value, offset, noAssert) {
@@ -9871,6 +9996,50 @@ Buffer.prototype.writeUInt32BE = function (value, offset, noAssert) {
   return offset + 4
 }
 
+Buffer.prototype.writeIntLE = function (value, offset, byteLength, noAssert) {
+  value = +value
+  offset = offset >>> 0
+  if (!noAssert) {
+    checkInt(this,
+             value,
+             offset,
+             byteLength,
+             Math.pow(2, 8 * byteLength - 1) - 1,
+             -Math.pow(2, 8 * byteLength - 1))
+  }
+
+  var i = 0
+  var mul = 1
+  var sub = value < 0 ? 1 : 0
+  this[offset] = value & 0xFF
+  while (++i < byteLength && (mul *= 0x100))
+    this[offset + i] = ((value / mul) >> 0) - sub & 0xFF
+
+  return offset + byteLength
+}
+
+Buffer.prototype.writeIntBE = function (value, offset, byteLength, noAssert) {
+  value = +value
+  offset = offset >>> 0
+  if (!noAssert) {
+    checkInt(this,
+             value,
+             offset,
+             byteLength,
+             Math.pow(2, 8 * byteLength - 1) - 1,
+             -Math.pow(2, 8 * byteLength - 1))
+  }
+
+  var i = byteLength - 1
+  var mul = 1
+  var sub = value < 0 ? 1 : 0
+  this[offset + i] = value & 0xFF
+  while (--i >= 0 && (mul *= 0x100))
+    this[offset + i] = ((value / mul) >> 0) - sub & 0xFF
+
+  return offset + byteLength
+}
+
 Buffer.prototype.writeInt8 = function (value, offset, noAssert) {
   value = +value
   offset = offset >>> 0
@@ -9936,8 +10105,9 @@ Buffer.prototype.writeInt32BE = function (value, offset, noAssert) {
 }
 
 function checkIEEE754 (buf, value, offset, ext, max, min) {
-  if (value > max || value < min) throw new TypeError('value is out of bounds')
-  if (offset + ext > buf.length) throw new TypeError('index out of range')
+  if (value > max || value < min) throw new RangeError('value is out of bounds')
+  if (offset + ext > buf.length) throw new RangeError('index out of range')
+  if (offset < 0) throw new RangeError('index out of range')
 }
 
 function writeFloat (buf, value, offset, littleEndian, noAssert) {
@@ -9976,18 +10146,19 @@ Buffer.prototype.copy = function (target, target_start, start, end) {
 
   if (!start) start = 0
   if (!end && end !== 0) end = this.length
+  if (target_start >= target.length) target_start = target.length
   if (!target_start) target_start = 0
+  if (end > 0 && end < start) end = start
 
   // Copy 0 bytes; we're done
-  if (end === start) return
-  if (target.length === 0 || source.length === 0) return
+  if (end === start) return 0
+  if (target.length === 0 || source.length === 0) return 0
 
   // Fatal error conditions
-  if (end < start) throw new TypeError('sourceEnd < sourceStart')
-  if (target_start < 0 || target_start >= target.length)
-    throw new TypeError('targetStart out of bounds')
-  if (start < 0 || start >= source.length) throw new TypeError('sourceStart out of bounds')
-  if (end < 0 || end > source.length) throw new TypeError('sourceEnd out of bounds')
+  if (target_start < 0)
+    throw new RangeError('targetStart out of bounds')
+  if (start < 0 || start >= source.length) throw new RangeError('sourceStart out of bounds')
+  if (end < 0) throw new RangeError('sourceEnd out of bounds')
 
   // Are we oob?
   if (end > this.length)
@@ -10004,6 +10175,8 @@ Buffer.prototype.copy = function (target, target_start, start, end) {
   } else {
     target._set(this.subarray(start, start + len), target_start)
   }
+
+  return len
 }
 
 // fill(value, start=0, end=buffer.length)
@@ -10012,14 +10185,14 @@ Buffer.prototype.fill = function (value, start, end) {
   if (!start) start = 0
   if (!end) end = this.length
 
-  if (end < start) throw new TypeError('end < start')
+  if (end < start) throw new RangeError('end < start')
 
   // Fill 0 bytes; we're done
   if (end === start) return
   if (this.length === 0) return
 
-  if (start < 0 || start >= this.length) throw new TypeError('start out of bounds')
-  if (end < 0 || end > this.length) throw new TypeError('end out of bounds')
+  if (start < 0 || start >= this.length) throw new RangeError('start out of bounds')
+  if (end < 0 || end > this.length) throw new RangeError('end out of bounds')
 
   var i
   if (typeof value === 'number') {
@@ -10085,11 +10258,15 @@ Buffer._augment = function (arr) {
   arr.compare = BP.compare
   arr.copy = BP.copy
   arr.slice = BP.slice
+  arr.readUIntLE = BP.readUIntLE
+  arr.readUIntBE = BP.readUIntBE
   arr.readUInt8 = BP.readUInt8
   arr.readUInt16LE = BP.readUInt16LE
   arr.readUInt16BE = BP.readUInt16BE
   arr.readUInt32LE = BP.readUInt32LE
   arr.readUInt32BE = BP.readUInt32BE
+  arr.readIntLE = BP.readIntLE
+  arr.readIntBE = BP.readIntBE
   arr.readInt8 = BP.readInt8
   arr.readInt16LE = BP.readInt16LE
   arr.readInt16BE = BP.readInt16BE
@@ -10100,10 +10277,14 @@ Buffer._augment = function (arr) {
   arr.readDoubleLE = BP.readDoubleLE
   arr.readDoubleBE = BP.readDoubleBE
   arr.writeUInt8 = BP.writeUInt8
+  arr.writeUIntLE = BP.writeUIntLE
+  arr.writeUIntBE = BP.writeUIntBE
   arr.writeUInt16LE = BP.writeUInt16LE
   arr.writeUInt16BE = BP.writeUInt16BE
   arr.writeUInt32LE = BP.writeUInt32LE
   arr.writeUInt32BE = BP.writeUInt32BE
+  arr.writeIntLE = BP.writeIntLE
+  arr.writeIntBE = BP.writeIntBE
   arr.writeInt8 = BP.writeInt8
   arr.writeInt16LE = BP.writeInt16LE
   arr.writeInt16BE = BP.writeInt16BE
@@ -10120,11 +10301,15 @@ Buffer._augment = function (arr) {
   return arr
 }
 
-var INVALID_BASE64_RE = /[^+\/0-9A-z]/g
+var INVALID_BASE64_RE = /[^+\/0-9A-z\-]/g
 
 function base64clean (str) {
   // Node strips out invalid characters like \n and \t from the string, base64-js does not
   str = stringtrim(str).replace(INVALID_BASE64_RE, '')
+  // replace url-safe space and slash
+  str = str.replace(/-/g, '+').replace(/_/g, '/')
+  // Node converts strings with length < 2 to ''
+  if (str.length < 2) return ''
   // Node allows for non-padded base64 strings (missing trailing ===), base64-js does not
   while (str.length % 4 !== 0) {
     str = str + '='
@@ -10148,22 +10333,100 @@ function toHex (n) {
   return n.toString(16)
 }
 
-function utf8ToBytes (str) {
-  var byteArray = []
-  for (var i = 0; i < str.length; i++) {
-    var b = str.charCodeAt(i)
-    if (b <= 0x7F) {
-      byteArray.push(b)
-    } else {
-      var start = i
-      if (b >= 0xD800 && b <= 0xDFFF) i++
-      var h = encodeURIComponent(str.slice(start, i+1)).substr(1).split('%')
-      for (var j = 0; j < h.length; j++) {
-        byteArray.push(parseInt(h[j], 16))
+function utf8ToBytes(string, units) {
+  var codePoint, length = string.length
+  var leadSurrogate = null
+  units = units || Infinity
+  var bytes = []
+  var i = 0
+
+  for (; i<length; i++) {
+    codePoint = string.charCodeAt(i)
+
+    // is surrogate component
+    if (codePoint > 0xD7FF && codePoint < 0xE000) {
+
+      // last char was a lead
+      if (leadSurrogate) {
+
+        // 2 leads in a row
+        if (codePoint < 0xDC00) {
+          if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD)
+          leadSurrogate = codePoint
+          continue
+        }
+
+        // valid surrogate pair
+        else {
+          codePoint = leadSurrogate - 0xD800 << 10 | codePoint - 0xDC00 | 0x10000
+          leadSurrogate = null
+        }
+      }
+
+      // no lead yet
+      else {
+
+        // unexpected trail
+        if (codePoint > 0xDBFF) {
+          if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD)
+          continue
+        }
+
+        // unpaired lead
+        else if (i + 1 === length) {
+          if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD)
+          continue
+        }
+
+        // valid lead
+        else {
+          leadSurrogate = codePoint
+          continue
+        }
       }
     }
+
+    // valid bmp char, but last char was a lead
+    else if (leadSurrogate) {
+      if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD)
+      leadSurrogate = null
+    }
+
+    // encode utf8
+    if (codePoint < 0x80) {
+      if ((units -= 1) < 0) break
+      bytes.push(codePoint)
+    }
+    else if (codePoint < 0x800) {
+      if ((units -= 2) < 0) break
+      bytes.push(
+        codePoint >> 0x6 | 0xC0,
+        codePoint & 0x3F | 0x80
+      );
+    }
+    else if (codePoint < 0x10000) {
+      if ((units -= 3) < 0) break
+      bytes.push(
+        codePoint >> 0xC | 0xE0,
+        codePoint >> 0x6 & 0x3F | 0x80,
+        codePoint & 0x3F | 0x80
+      );
+    }
+    else if (codePoint < 0x200000) {
+      if ((units -= 4) < 0) break
+      bytes.push(
+        codePoint >> 0x12 | 0xF0,
+        codePoint >> 0xC & 0x3F | 0x80,
+        codePoint >> 0x6 & 0x3F | 0x80,
+        codePoint & 0x3F | 0x80
+      );
+    }
+    else {
+      throw new Error('Invalid code point')
+    }
   }
-  return byteArray
+
+  return bytes
 }
 
 function asciiToBytes (str) {
@@ -10175,10 +10438,13 @@ function asciiToBytes (str) {
   return byteArray
 }
 
-function utf16leToBytes (str) {
+function utf16leToBytes (str, units) {
   var c, hi, lo
   var byteArray = []
   for (var i = 0; i < str.length; i++) {
+
+    if ((units -= 2) < 0) break
+
     c = str.charCodeAt(i)
     hi = c >> 8
     lo = c % 256
@@ -10190,7 +10456,7 @@ function utf16leToBytes (str) {
 }
 
 function base64ToBytes (str) {
-  return base64.toByteArray(str)
+  return base64.toByteArray(base64clean(str))
 }
 
 function blitBuffer (src, dst, offset, length, unitSize) {
@@ -68203,7 +68469,7 @@ module.exports = Request
 
 }).call(this,require('_process'),require("buffer").Buffer)
 },{"./lib/cookies":199,"./lib/copy":200,"./lib/debug":201,"./lib/helpers":202,"_process":172,"aws-sign2":203,"bl":204,"buffer":21,"caseless":215,"combined-stream":216,"forever-agent":218,"form-data":219,"hawk":224,"http":164,"http-signature":239,"https":168,"mime-types":256,"net":5,"node-uuid":259,"oauth-sign":260,"qs":261,"querystring":176,"stream":188,"stringstream":266,"tunnel-agent":271,"url":190,"util":192,"zlib":20}],273:[function(require,module,exports){
-(function() { var head = document.getElementsByTagName('head')[0]; style = document.createElement('style'); style.type = 'text/css';var css = ".player{-webkit-box-shadow:0 0 8px #98968d;box-shadow:0 0 8px #98968d;-webkit-user-select:none;-khtml-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;-webkit-touch-callout:none;background-color:#180707;border:1px solid #c3c3c3;color:#f5f5d7;cursor:default;font-family:monospace;font-size:12px;height:100%;position:relative}.player .playlist{-webkit-box-shadow:0 0 8px #98968d;box-shadow:0 0 8px #98968d;background-color:#fdffee;border-top:0;border:1px solid #c3c3c3;max-height:400px;overflow-y:auto;padding:10px;position:relative;top:0;margin-bottom:100px}.player .playlist div{cursor:pointer;height:25px;padding-bottom:5px}.player .playlist div:last-child{padding:0}.player .playlist .selected span,.player .playlist div:hover span{text-decoration:underline}.player .playlist img{height:100%;width:auto}.player .playlist span{color:#373333;display:inline-block;margin-top:5px;vertical-align:top}.player .playlist.playlist-len-,.player .playlist.playlist-len-0{display:none}.player .artwork{-webkit-background-size:200%;background-size:200%;-ms-filter:\"progid:DXImageTransform.Microsoft.Alpha(Opacity=50)\";filter:alpha(opacity=(50));opacity:.5;-webkit-transition:background-position .5s,opacity .4s;-moz-transition:background-position .5s,opacity .4s;-o-transition:background-position .5s,opacity .4s;-ms-transition:background-position .5s,opacity .4s;transition:background-position .5s,opacity .4s;background-position-y:50%;height:100%;position:relative;z-index:0}.player .controls{-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box;background:rgba(15,13,13,0.6);bottom:0;height:30%;left:0;padding:5% 10px 0 10px;position:absolute;right:0;z-index:1}.player .controls input[type=\'range\']{-webkit-appearance:none;background:#626262;border:0;height:2px;margin:0;outline:0;padding:0;position:relative;top:-2px;width:100%}.player .controls input[type=\'range\']::-webkit-slider-thumb{-webkit-appearance:none;background-color:#eae5b2;border:0;height:20px;width:2px}.player .controls table{color:inherit;width:100%}.player .controls td:nth-of-type(1),.player .controls td:nth-of-type(3){height:18px;width:55px}.player .controls td:nth-of-type(1){padding-right:5px;text-align:right}.player .controls td:nth-of-type(3){padding-left:5px;text-align:left}.player .controls .buttons{position:relative;text-align:center;top:41%;-webkit-transform:translateY(-100%);-moz-transform:translateY(-100%);-ms-transform:translateY(-100%);-o-transform:translateY(-100%);transform:translateY(-100%)}.player .controls .buttons svg{fill:currentColor;height:20%;margin:0 1.5%;width:7%}.player .info{text-shadow:-1px 0 #180707,0 1px #180707,1px 0 #180707,0 -1px #180707;padding:11px;position:absolute;top:0;z-index:1}.player .loader{display:none;position:absolute;text-align:center;top:50%;-webkit-transform:translateY(-50%);-moz-transform:translateY(-50%);-ms-transform:translateY(-50%);-o-transform:translateY(-50%);transform:translateY(-50%);width:100%}.player .clickable{cursor:pointer}.player .move-left{left:3px;position:relative}.player.state-playing .artwork{-ms-filter:\"progid:DXImageTransform.Microsoft.Alpha(Opacity=100)\";filter:alpha(opacity=(100));opacity:1}.player.state-playing .controls .buttons .play{display:none}.player.state-seeking .loader{display:initial}.player.state-loading .loader{display:initial}.player.state-ended .controls input[type=\'range\']::-webkit-slider-thumb{height:0;width:0}.player.state-paused .controls .buttons .pause{display:none}";if (style.styleSheet){ style.styleSheet.cssText = css; } else { style.appendChild(document.createTextNode(css)); } head.appendChild(style);}())
+(function() { var head = document.getElementsByTagName('head')[0]; style = document.createElement('style'); style.type = 'text/css';var css = ".player{-webkit-box-shadow:0 0 8px #98968d;box-shadow:0 0 8px #98968d;-webkit-user-select:none;-khtml-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;-webkit-touch-callout:none;background-color:#180707;border:1px solid #c3c3c3;color:#f5f5d7;cursor:default;font-family:monospace;font-size:12px;height:100%;position:relative}.player .playlist{-webkit-box-shadow:0 0 8px #98968d;box-shadow:0 0 8px #98968d;background-color:#fdffee;border-top:0;border:1px solid #c3c3c3;max-height:400px;overflow-y:auto;padding:10px;position:relative;top:0;margin-bottom:100px}.player .playlist div{cursor:pointer;height:25px;padding-bottom:5px}.player .playlist div:last-child{padding:0}.player .playlist .selected span,.player .playlist div:hover span{text-decoration:underline}.player .playlist img{height:100%;width:auto}.player .playlist span{color:#373333;display:inline-block;margin-top:5px;vertical-align:top}.player .playlist.playlist-len-,.player .playlist.playlist-len-0{display:none}.player .artwork{-webkit-background-size:200%;background-size:200%;-ms-filter:\"progid:DXImageTransform.Microsoft.Alpha(Opacity=50)\";filter:alpha(opacity=(50));opacity:.5;-webkit-transition:background-position .5s,opacity .4s;-moz-transition:background-position .5s,opacity .4s;-o-transition:background-position .5s,opacity .4s;-ms-transition:background-position .5s,opacity .4s;transition:background-position .5s,opacity .4s;background-position-y:50%;height:100%;position:relative;z-index:0}.player .controls{-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box;background:rgba(15,13,13,0.6);bottom:0;height:30%;left:0;padding:5% 10px 0 10px;position:absolute;right:0;z-index:1}.player .controls input[type=\'range\']{-webkit-appearance:none;background:#626262;border:0;height:2px;margin:0;outline:0;padding:0;position:relative;top:-2px;width:100%}.player .controls input[type=\'range\']::-moz-range-thumb,.player .controls input[type=\'range\']::-webkit-slider-thumb{-webkit-appearance:none;background-color:#eae5b2;border:0;height:20px;width:2px}.player .controls table{color:inherit;width:100%}.player .controls td:nth-of-type(1),.player .controls td:nth-of-type(3){height:18px;width:55px}.player .controls td:nth-of-type(1){padding-right:5px;text-align:right}.player .controls td:nth-of-type(3){padding-left:5px;text-align:left}.player .controls .buttons{position:relative;text-align:center;top:41%;-webkit-transform:translateY(-100%);-moz-transform:translateY(-100%);-ms-transform:translateY(-100%);-o-transform:translateY(-100%);transform:translateY(-100%)}.player .controls .buttons svg{fill:currentColor;height:20px;margin:0 1.5%;width:20px}.player .info{text-shadow:-1px 0 #180707,0 1px #180707,1px 0 #180707,0 -1px #180707;padding:11px;position:absolute;top:0;z-index:1}.player .loader{display:none;position:absolute;text-align:center;top:50%;-webkit-transform:translateY(-50%);-moz-transform:translateY(-50%);-ms-transform:translateY(-50%);-o-transform:translateY(-50%);transform:translateY(-50%);width:100%}.player .clickable{cursor:pointer}.player .move-left{left:3px;position:relative}.player.state-playing .artwork{-ms-filter:\"progid:DXImageTransform.Microsoft.Alpha(Opacity=100)\";filter:alpha(opacity=(100));opacity:1}.player.state-playing .controls .buttons .play{display:none}.player.state-seeking .loader{display:initial}.player.state-loading .loader{display:initial}.player.state-ended .controls input[type=\'range\']::-webkit-slider-thumb{height:0;width:0}.player.state-paused .controls .buttons .pause{display:none}";if (style.styleSheet){ style.styleSheet.cssText = css; } else { style.appendChild(document.createTextNode(css)); } head.appendChild(style);}())
 },{}],274:[function(require,module,exports){
 (function (Buffer){
 'use strict';
