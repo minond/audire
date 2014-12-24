@@ -9,14 +9,21 @@
     cursor: default;
     font-family: monospace;
     font-size: 12px;
-    overflow: hidden;
+    height: 100%;
     position: relative;
 
     .playlist {
+        .box-shadow(0px 0px 8px rgb(152, 150, 141));
         background-color: #FDFFEE;
+        border-top: 0;
+        border: 1px solid rgb(195, 195, 195);
         max-height: 400px;
         overflow-y: auto;
         padding: 10px;
+        position: relative;
+        top: 0%;
+
+        margin-bottom: 100px;
 
         div {
             cursor: pointer;
@@ -83,6 +90,8 @@
             margin: 0;
             outline: 0;
             padding: 0;
+            position: relative;
+            top: -2px;
             width: 100%;
         }
 
@@ -125,6 +134,7 @@
                 fill: currentColor;
                 height: 20%;
                 margin: 0 1.5%;
+                width: 7%;
             }
         }
     }
