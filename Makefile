@@ -23,6 +23,5 @@ lint: install js-lint
 pages:
 	git fetch --all
 	git checkout gh-pages
-	git pull --rebase origin gh-pages
 	git merge --no-ff master
 	git push origin gh-pages
