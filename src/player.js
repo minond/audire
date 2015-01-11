@@ -32,6 +32,7 @@ Player.prototype.load = function (song) {
 };
 
 /**
+ * @method setPlaylist
  * @param {Song[]} songs
  * @return {Player}
  */
@@ -44,6 +45,16 @@ Player.prototype.setPlaylist = function (songs) {
     }
 
     return this;
+};
+
+/**
+ * adds a song to the player's playlist (one at a time)
+ * @method addSong
+ * @param {Song} song
+ * @return {Player}
+ */
+Player.prototype.addSong = function (song) {
+    return this.setPlaylist(this.playlist.concat(song));
 };
 
 /**
